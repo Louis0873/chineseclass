@@ -87,6 +87,10 @@ const gradeIcons=['🌱','🐣','🦊','🦁','🐉','🚀'];
 const labels=['启蒙小队','快乐新手','思维达人','成语高手','智慧挑战','毕业冲刺'];
 let student='', grade=0, mode='fill', index=0, score=0, answered=false, selected=null, questionSet=[];
 const $=id=>document.getElementById(id);
+function progressKey(){return student+'|'+grade+'|'+mode}
+function getProgress(){return safeParse(localStorage.getItem('idiomQuestionProgressV1')||'{}',{})}
+function saveProgress(){if(!student)return;const p=getProgress();p[progressKey()]=Math.max(0,Math.min(499,index));localStorage.setItem('idiomQuestionProgressV1',JSON.stringify(p))}
+function loadProgress(){const p=getProgress();index=Math.max(0,Math.min(499,Number(p[progressKey()]||0)));answered=false;selected=null}
 function safeParse(s, fallback){try{return JSON.parse(s)||fallback}catch(e){return fallback}}
 function getRecords(){return safeParse(localStorage.getItem('idiomPlayRecordsV2')||'{}',{})}
 function setRecords(r){localStorage.setItem('idiomPlayRecordsV2',JSON.stringify(r))}
@@ -98,7 +102,7 @@ function applyManualScore(points){const who=$('scoreStudent').value;if(!who)retu
 $('givePoint').onclick=()=>applyManualScore(1);$('takePoint').onclick=()=>applyManualScore(-1);$('closeScoreModal').onclick=closeScoreModal;
 function getRoster(){return safeParse(localStorage.getItem('idiomClassRosterV2')||'[]',[])}
 function saveRoster(list){localStorage.setItem('idiomClassRosterV2',JSON.stringify([...new Set(list.map(x=>x.trim()).filter(Boolean))]))}
-function enterApp(list){list=[...new Set(list.map(x=>x.trim()).filter(Boolean))];if(!list.length){alert('请至少输入一位学生姓名，每行一位。');$('rosterInput').focus();return}saveRoster(list);student=list[0];const r=record();score=r.total||0;$('entry').classList.add('hidden');$('app').classList.remove('hidden');$('activeName').textContent=student;populateStudents();makeGrades();renderLeaderboard();render()}
+function enterApp(list){list=[...new Set(list.map(x=>x.trim()).filter(Boolean))];if(!list.length){alert('请至少输入一位学生姓名，每行一位。');$('rosterInput').focus();return}saveRoster(list);student=list[0];loadProgress();const r=record();score=r.total||0;$('entry').classList.add('hidden');$('app').classList.remove('hidden');$('activeName').textContent=student;populateStudents();makeGrades();renderLeaderboard();render()}
 function start(){const names=$('rosterInput').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);if(!names.length){alert('请先在名单框输入学生姓名，每行一位；也可以展开下方只输入一位学生。');$('rosterInput').focus();return}enterApp(names)}
 function populateStudents(){$('activeName').textContent=student}
 function switchToStudent(n){if(!n)return;student=n;const r=record();score=r.total||0;answered=false;selected=null;populateStudents();$('score').textContent=score;render();renderLeaderboard()}
@@ -107,7 +111,7 @@ $('loadRoster').onclick=()=>{$('rosterInput').value=getRoster().join('\n');if(!$
 $('singleStart').onclick=()=>{const n=$('studentName').value.trim();if(!n){alert('请输入学生姓名。');return}enterApp([n])};
 // 已移除旧版学生下拉框的事件绑定；当前版本使用“添加学生”按钮。
 $('addStudentBtn').onclick=()=>{const n=prompt('请输入要添加的学生姓名：');if(!n||!n.trim())return;const list=getRoster();if(list.includes(n.trim())){alert('名单里已经有这位学生。');return}list.push(n.trim());saveRoster(list);switchToStudent(n.trim())};
-function makeGrades(){$('grades').innerHTML=gradeNames.map((n,i)=>`<button class="grade g${i+1} ${grade===i?'active':''}" data-grade="${i}"><span>${gradeIcons[i]}</span>${n}<br><small>${labels[i]}</small><br><small>500题</small></button>`).join('');document.querySelectorAll('[data-grade]').forEach(b=>b.onclick=()=>{grade=+b.dataset.grade;index=0;answered=false;makeGrades();render()})}
+function makeGrades(){$('grades').innerHTML=gradeNames.map((n,i)=>`<button class="grade g${i+1} ${grade===i?'active':''}" data-grade="${i}"><span>${gradeIcons[i]}</span>${n}<br><small>${labels[i]}</small><br><small>500题</small></button>`).join('');document.querySelectorAll('[data-grade]').forEach(b=>b.onclick=()=>{grade=+b.dataset.grade;loadProgress();makeGrades();render()})}
 function shuffle(a){return a.slice().sort(()=>Math.random()-.5)}
 function makeQuestions(){const source=bank[grade];const templates=[
 it=>it.prompt,
@@ -137,7 +141,7 @@ it=>`选出意思最接近下面解释的成语：${it.meaning}`,
 it=>`成语应用挑战：${it.example.replace(it.idiom,'（　　　　）')}`,
 it=>`最后一题型挑战：释义是“${it.meaning.replace(/[。]$/,'')}”，请选出正确成语。`
 ];let qs=[];for(let round=0;round<25;round++){source.forEach((it,i)=>{qs.push({...it,prompt:templates[round](it),round,id:round*source.length+i})})}return qs}
-function setMode(m){mode=m;index=0;answered=false;selected=null;document.querySelectorAll('[data-mode]').forEach(b=>{b.classList.toggle('secondary',b.dataset.mode!==m)});render();$('game').scrollIntoView({behavior:'smooth',block:'start'})}
+function setMode(m){mode=m;loadProgress();document.querySelectorAll('[data-mode]').forEach(b=>{b.classList.toggle('secondary',b.dataset.mode!==m)});render();$('game').scrollIntoView({behavior:'smooth',block:'start'})}
 function render(){if(grade<0)return;const r=record();$('gradeTitle').textContent=gradeNames[grade]+'探险队';$('score').textContent=score;$('best').textContent=(r.best&&r.best[grade])||0;$('count').textContent=Math.min(index+1,500)+'/500';$('bar').style.width=(Math.min(index+1,500)/500*100)+'%';$('answerPanel').classList.add('hidden');questionSet=makeQuestions();let item=questionSet[index%500];let title=mode==='fill'?'✏️ 成语填充':mode==='picture'?'🖼️ 看图猜成语':'🔗 成语接龙';
 if(mode==='fill'||mode==='picture'){
 let prompt=mode==='fill'?item.prompt:'观察下面的图像线索，猜一猜对应的成语。';
@@ -162,8 +166,8 @@ selected=null;document.querySelectorAll('[data-word]').forEach(b=>b.onclick=()=>
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function checkAnswer(){if(answered)return;if(!selected){alert('请先选择一个成语！');return}let item=questionSet[index%500];let correct=selected===item.idiom;let f=$('feedback');f.className='feedback show '+(correct?'':'wrong');f.innerHTML=(correct?'🎉 答对了！':'再试试看！正确答案是：<b>'+esc(item.idiom)+'</b>')+`<div class="explain"><b>注释：</b>${esc(item.meaning)}<br><b>白话说明：</b>${esc(plain(item.meaning))}<br><b>例句：</b>${esc(item.example)}</div>`;answered=true;$('next').disabled=false;showScoreModal(correct,item.idiom)}
 function plain(s){return s.replace(/^形容/,'意思是').replace(/^比喻/,'就是比喻').replace(/。$/,'。')}
-function next(){if(!answered){alert('请先回答并提交本题，才能进入下一题。');return}index=(index+1)%500;answered=false;selected=null;render()}
-function prev(){index=(index-1+500)%500;answered=false;selected=null;render()}
+function next(){if(!answered){alert('请先回答并提交本题，才能进入下一题。');return}index=(index+1)%500;answered=false;selected=null;saveProgress();render()}
+function prev(){index=(index-1+500)%500;answered=false;selected=null;saveProgress();render()}
 const chainNotes={
 '意气风发':['形容精神振奋、气概豪迈。','同学们意气风发地迎接新的挑战。'],
 '发扬光大':['使好的传统、作风或事业得到发展和提高。','我们要把互相帮助的精神发扬光大。'],
