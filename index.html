@@ -105,7 +105,7 @@ function saveRoster(list){localStorage.setItem('idiomClassRosterV2',JSON.stringi
 function enterApp(list){list=[...new Set(list.map(x=>x.trim()).filter(Boolean))];if(!list.length){alert('请至少输入一位学生姓名，每行一位。');$('rosterInput').focus();return}saveRoster(list);student=list[0];loadProgress();const r=record();score=r.total||0;$('entry').classList.add('hidden');$('app').classList.remove('hidden');$('activeName').textContent=student;populateStudents();makeGrades();renderLeaderboard();render()}
 function start(){const names=$('rosterInput').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);if(!names.length){alert('请先在名单框输入学生姓名，每行一位；也可以展开下方只输入一位学生。');$('rosterInput').focus();return}enterApp(names)}
 function populateStudents(){$('activeName').textContent=student}
-function switchToStudent(n){if(!n)return;student=n;const r=record();score=r.total||0;answered=false;selected=null;populateStudents();$('score').textContent=score;render();renderLeaderboard()}
+function switchToStudent(n){if(!n)return;student=n;loadProgress();const r=record();score=r.total||0;answered=false;selected=null;populateStudents();$('score').textContent=score;render();renderLeaderboard()}
 $('startBtn').onclick=start;
 $('loadRoster').onclick=()=>{$('rosterInput').value=getRoster().join('\n');if(!$('rosterInput').value)alert('当前浏览器还没有保存过班级名单。')};
 $('singleStart').onclick=()=>{const n=$('studentName').value.trim();if(!n){alert('请输入学生姓名。');return}enterApp([n])};
