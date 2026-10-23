@@ -99,7 +99,7 @@ function switchToStudent(n){if(!n)return;student=n;const r=record();score=r.tota
 $('startBtn').onclick=start;
 $('loadRoster').onclick=()=>{$('rosterInput').value=getRoster().join('\n');if(!$('rosterInput').value)alert('当前浏览器还没有保存过班级名单。')};
 $('singleStart').onclick=()=>{const n=$('studentName').value.trim();if(!n){alert('请输入学生姓名。');return}enterApp([n])};
-$('studentSelect').onchange=e=>switchToStudent(e.target.value);
+// 已移除旧版学生下拉框的事件绑定；当前版本使用“添加学生”按钮。
 $('addStudentBtn').onclick=()=>{const n=prompt('请输入要添加的学生姓名：');if(!n||!n.trim())return;const list=getRoster();if(list.includes(n.trim())){alert('名单里已经有这位学生。');return}list.push(n.trim());saveRoster(list);switchToStudent(n.trim())};
 function makeGrades(){$('grades').innerHTML=gradeNames.map((n,i)=>`<button class="grade g${i+1} ${grade===i?'active':''}" data-grade="${i}"><span>${gradeIcons[i]}</span>${n}<br><small>${labels[i]}</small><br><small>500题</small></button>`).join('');document.querySelectorAll('[data-grade]').forEach(b=>b.onclick=()=>{grade=+b.dataset.grade;index=0;answered=false;makeGrades();render()})}
 function shuffle(a){return a.slice().sort(()=>Math.random()-.5)}
