@@ -59,9 +59,9 @@ h3{font-size:1.3rem}
   <div class="stats"><span class="stat" id="gradeTitle">一年级探险队</span><span class="stat">⭐ 当前积分：<span id="score">0</span></span><span class="stat">📈 本年段进度：<span id="count">1/500</span></span><span class="stat">🏅 本年段最佳：<span id="best">0</span></span></div>
   <div class="progress"><div class="bar" id="bar"></div></div>
   <div class="toolbar">
-    <button class="btn" data-mode="fill">✏️ 成语填充</button>
-    <button class="btn secondary" data-mode="picture">🖼️ 看图猜成语</button>
-    <button class="btn secondary" data-mode="chain">🔗 成语接龙</button>
+    <button type="button" class="btn" data-mode="fill" onclick="setMode('fill')">✏️ 成语填充</button>
+    <button type="button" class="btn secondary" data-mode="picture" onclick="setMode('picture')">🖼️ 看图猜成语</button>
+    <button type="button" class="btn secondary" data-mode="chain" onclick="setMode('chain')">🔗 成语接龙</button>
     <button class="btn secondary" id="answersBtn">📖 本年段答案与注释</button>
     
   </div>
@@ -131,7 +131,7 @@ it=>`选出意思最接近下面解释的成语：${it.meaning}`,
 it=>`成语应用挑战：${it.example.replace(it.idiom,'（　　　　）')}`,
 it=>`最后一题型挑战：释义是“${it.meaning.replace(/[。]$/,'')}”，请选出正确成语。`
 ];let qs=[];for(let round=0;round<25;round++){source.forEach((it,i)=>{qs.push({...it,prompt:templates[round](it),round,id:round*source.length+i})})}return qs}
-function setMode(m){mode=m;index=0;answered=false;selected=null;document.querySelectorAll('[data-mode]').forEach(b=>{b.classList.toggle('secondary',b.dataset.mode!==m)});render()}
+function setMode(m){mode=m;index=0;answered=false;selected=null;document.querySelectorAll('[data-mode]').forEach(b=>{b.classList.toggle('secondary',b.dataset.mode!==m)});render();$('game').scrollIntoView({behavior:'smooth',block:'start'})}
 function render(){if(grade<0)return;const r=record();$('gradeTitle').textContent=gradeNames[grade]+'探险队';$('score').textContent=score;$('best').textContent=(r.best&&r.best[grade])||0;$('count').textContent=Math.min(index+1,500)+'/500';$('bar').style.width=(Math.min(index+1,500)/500*100)+'%';$('answerPanel').classList.add('hidden');questionSet=makeQuestions();let item=questionSet[index%500];let title=mode==='fill'?'✏️ 成语填充':mode==='picture'?'🖼️ 看图猜成语':'🔗 成语接龙';
 if(mode==='fill'||mode==='picture'){
 let prompt=mode==='fill'?item.prompt:'观察下面的图像线索，猜一猜对应的成语。';
