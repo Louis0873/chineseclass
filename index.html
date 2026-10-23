@@ -142,12 +142,12 @@ selected=null;document.querySelectorAll('[data-word]').forEach(b=>b.onclick=()=>
 const gradeRoutes=[
 [['一心一意','意气风发','发扬光大'],['欢天喜地','地久天长','长年累月'],['井井有条','条条大路','路不拾遗']],
 [['一举两得','得心应手','手忙脚乱'],['大吃一惊','惊天动地','地久天长'],['自言自语','语重心长','长年累月']],
-[['胸有成竹','竹报平安','安居乐业'],['一举两得','得心应手','手忙脚乱'],['津津有味','味同嚼蜡','蜡...?']],
-[['持之以恒','恒河沙数','数一数二'],['同舟共济','济济一堂','堂堂正正'],['水滴石穿','穿针引线','线...?']],
+[['胸有成竹','竹报平安','安居乐业'],['一举两得','得心应手','手忙脚乱'],['心旷神怡','怡然自得','得心应手']],
+[['持之以恒','恒河沙数','数一数二'],['同舟共济','济济一堂','堂堂正正'],['水滴石穿','穿凿附会','会心一笑']],
 [['饮水思源','源远流长','长治久安'],['见微知著','著书立说','说一不二'],['随机应变','变本加厉','厉兵秣马']],
-[['集思广益','益国利民','民富国强'],['见微知著','著书立说','说一不二'],['深思熟虑','虑周藻密','密...?']]
+[['集思广益','益国利民','民富国强'],['见微知著','著书立说','说一不二'],['深思熟虑','虑周藻密','密云不雨']]
 ];
-const routes=gradeRoutes[grade].filter(route=>route.every(w=>!w.includes('?')));
+const routes=gradeRoutes[grade];
 const route=routes[Math.floor(index/3)%routes.length], missing=(index+Math.floor(index/3))%3;
 const choices=shuffle([route[missing],...shuffle(routes.flat().filter(x=>x!==route[missing])).slice(0,5)]);
 $('game').innerHTML=`<div class="question"><div class="qtop"><h2>${title}</h2><span class="tag">第 ${index%500+1} / 500 题 · ${gradeNames[grade]}</span></div><p class="prompt">接龙规则：前一个成语的最后一个字，要与下一个成语的第一个字相同。请选择缺少的成语。</p><div class="chainrow">${route.map((w,i)=>i===missing?'<span class="chainword" style="background:#e4f4ff">❓ 缺一格</span>':`<span class="chainword">${w}</span>`).join('<span class="chainarrow">→</span>')}</div><div class="options">${choices.map(w=>`<button class="option" data-word="${esc(w)}">${esc(w)}</button>`).join('')}</div><div class="toolbar"><button class="btn" id="check">检查接龙</button><button class="btn secondary" id="next">下一题 →</button></div><div class="feedback" id="feedback"></div></div>`;
