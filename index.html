@@ -51,12 +51,12 @@ h3{font-size:1.3rem}
 </section>
 <div id="app" class="hidden">
 <section class="panel">
-  <div class="qtop"><h2>🧭 选择学生年段</h2><span class="name-pill">👤 当前学生：<span id="activeName"></span></span></div><div class="toolbar"><label for="studentSelect" style="font-weight:900;align-self:center">切换答题学生：</label><select id="studentSelect" aria-label="选择当前答题学生"></select><button class="btn secondary" id="addStudentBtn">＋ 添加学生</button></div>
+  <div class="qtop"><h2>🧭 选择学生年段</h2><span class="name-pill">👤 当前学生：<span id="activeName"></span></span></div><div class="toolbar"><button class="btn secondary" id="addStudentBtn">＋ 添加学生</button></div>
   <div class="gradegrid" id="grades"></div>
-  <p class="small">年段分类为教学难度建议，并非教育部逐年级官方成语清单。每个年段至少100道题；每题答对得1分，答错扣1分。成语注释与例句可在答案手册查看。</p>
+  <p class="small">年段分类为教学难度建议，并非教育部逐年级官方成语清单。每个年段500道题；每题答对得1分，答错扣1分。成语注释与例句可在答案手册查看。</p>
 </section>
 <section class="panel">
-  <div class="stats"><span class="stat" id="gradeTitle">一年级探险队</span><span class="stat">⭐ 当前积分：<span id="score">0</span></span><span class="stat">📈 本年段进度：<span id="count">1/100</span></span><span class="stat">🏅 本年段最佳：<span id="best">0</span></span></div>
+  <div class="stats"><span class="stat" id="gradeTitle">一年级探险队</span><span class="stat">⭐ 当前积分：<span id="score">0</span></span><span class="stat">📈 本年段进度：<span id="count">1/500</span></span><span class="stat">🏅 本年段最佳：<span id="best">0</span></span></div>
   <div class="progress"><div class="bar" id="bar"></div></div>
   <div class="toolbar">
     <button class="btn" data-mode="fill">✏️ 成语填充</button>
@@ -101,31 +101,62 @@ $('loadRoster').onclick=()=>{$('rosterInput').value=getRoster().join('\n');if(!$
 $('singleStart').onclick=()=>{const n=$('studentName').value.trim();if(!n){alert('请输入学生姓名。');return}enterApp([n])};
 $('studentSelect').onchange=e=>switchToStudent(e.target.value);
 $('addStudentBtn').onclick=()=>{const n=prompt('请输入要添加的学生姓名：');if(!n||!n.trim())return;const list=getRoster();if(list.includes(n.trim())){alert('名单里已经有这位学生。');return}list.push(n.trim());saveRoster(list);switchToStudent(n.trim())};
-function makeGrades(){$('grades').innerHTML=gradeNames.map((n,i)=>`<button class="grade g${i+1} ${grade===i?'active':''}" data-grade="${i}"><span>${gradeIcons[i]}</span>${n}<br><small>${labels[i]}</small><br><small>100题起</small></button>`).join('');document.querySelectorAll('[data-grade]').forEach(b=>b.onclick=()=>{grade=+b.dataset.grade;index=0;answered=false;makeGrades();render()})}
+function makeGrades(){$('grades').innerHTML=gradeNames.map((n,i)=>`<button class="grade g${i+1} ${grade===i?'active':''}" data-grade="${i}"><span>${gradeIcons[i]}</span>${n}<br><small>${labels[i]}</small><br><small>500题</small></button>`).join('');document.querySelectorAll('[data-grade]').forEach(b=>b.onclick=()=>{grade=+b.dataset.grade;index=0;answered=false;makeGrades();render()})}
 function shuffle(a){return a.slice().sort(()=>Math.random()-.5)}
-function makeQuestions(){const source=bank[grade];let qs=[];for(let round=0;round<5;round++){source.forEach((it,i)=>{let prompt=it.prompt; if(round===1)prompt=`${it.example.replace(it.idiom,'＿＿＿＿')} 这句话适合填入哪个成语？`; if(round===2)prompt=`${it.meaning.replace(/[。]$/,'')}，可以用哪个成语表示？（　　）`; if(round===3)prompt=`情境：${it.example} 请选出最适合的成语：（　　）`; if(round===4)prompt=`读一读并完成填充：${it.example.replace(it.idiom,'＿＿＿＿')}（　　）`;qs.push({...it,prompt,round,id:round*source.length+i})})}return qs}
+function makeQuestions(){const source=bank[grade];const templates=[
+it=>it.prompt,
+it=>`${it.example.replace(it.idiom,'＿＿＿＿')} 这句话适合填入哪个成语？`,
+it=>`${it.meaning.replace(/[。]$/,'')}，可以用哪个成语表示？（　　）`,
+it=>`情境：${it.example} 请选出最适合的成语：（　　）`,
+it=>`读一读并完成填充：${it.example.replace(it.idiom,'＿＿＿＿')}（　　）`,
+it=>`如果要表达“${it.meaning.replace(/[。]$/,'')}”，应该选哪个成语？`,
+it=>`判断下面的情境最符合哪个成语：${it.example.replace(it.idiom,'某个成语')}`,
+it=>`根据释义选择：${it.meaning}（　　）`,
+it=>`把成语填入句子：${it.example.replace(it.idiom,'（　　　　）')}`,
+it=>`哪一个成语最适合形容这种情况？${it.example}`,
+it=>`成语释义挑战：${it.meaning.replace(/[。]$/,'')}。请选出答案。`,
+it=>`读情境，找成语：${it.example.replace(it.idiom,'＿＿＿＿')}`,
+it=>`请选出与以下解释相符的成语——${it.meaning}`,
+it=>`生活中遇到这样的情况：${it.example} 可以用哪个成语概括？`,
+it=>`理解成语意思后作答：${it.meaning}（　　）`,
+it=>`句子填空挑战：${it.example.replace(it.idiom,'________')}`,
+it=>`哪个成语能准确表达“${it.meaning.replace(/[。]$/,'')}”？`,
+it=>`从语境判断：${it.example.replace(it.idiom,'（　　　　）')}`,
+it=>`请选择能放进空格、又符合句意的成语：${it.example.replace(it.idiom,'＿＿＿＿')}`,
+it=>`成语理解题：${it.meaning} 请选答案。`,
+it=>`看清句意再选择：${it.example.replace(it.idiom,'＿＿＿＿')}`,
+it=>`根据意思猜成语：${it.meaning.replace(/[。]$/,'')}。`,
+it=>`如果把这句话概括成一个成语，应该是哪个？${it.example}`,
+it=>`选出意思最接近下面解释的成语：${it.meaning}`,
+it=>`成语应用挑战：${it.example.replace(it.idiom,'（　　　　）')}`,
+it=>`最后一题型挑战：释义是“${it.meaning.replace(/[。]$/,'')}”，请选出正确成语。`
+];let qs=[];for(let round=0;round<25;round++){source.forEach((it,i)=>{qs.push({...it,prompt:templates[round](it),round,id:round*source.length+i})})}return qs}
 function setMode(m){mode=m;index=0;answered=false;selected=null;document.querySelectorAll('[data-mode]').forEach(b=>{b.classList.toggle('secondary',b.dataset.mode!==m)});render()}
-function render(){if(grade<0)return;const r=record();$('gradeTitle').textContent=gradeNames[grade]+'探险队';$('score').textContent=score;$('best').textContent=(r.best&&r.best[grade])||0;$('count').textContent=Math.min(index+1,100)+'/100';$('bar').style.width=(Math.min(index+1,100))+'%';$('answerPanel').classList.add('hidden');questionSet=makeQuestions();let item=questionSet[index%100];let title=mode==='fill'?'✏️ 成语填充':mode==='picture'?'🖼️ 看图猜成语':'🔗 成语接龙';
+function render(){if(grade<0)return;const r=record();$('gradeTitle').textContent=gradeNames[grade]+'探险队';$('score').textContent=score;$('best').textContent=(r.best&&r.best[grade])||0;$('count').textContent=Math.min(index+1,500)+'/500';$('bar').style.width=(Math.min(index+1,500)/500*100)+'%';$('answerPanel').classList.add('hidden');questionSet=makeQuestions();let item=questionSet[index%500];let title=mode==='fill'?'✏️ 成语填充':mode==='picture'?'🖼️ 看图猜成语':'🔗 成语接龙';
 if(mode==='fill'||mode==='picture'){
 let prompt=mode==='fill'?item.prompt:'观察下面的图像线索，猜一猜对应的成语。';
 let choices=shuffle([item.idiom,...shuffle(bank[grade].filter(x=>x.idiom!==item.idiom)).slice(0,5).map(x=>x.idiom)]);
-$('game').innerHTML=`<div class="question"><div class="qtop"><h2>${title}</h2><span class="tag">第 ${index%100+1} / 100 题 · ${gradeNames[grade]}</span></div>${mode==='picture'?`<div class="scene" role="img" aria-label="成语图像联想">${item.pic}</div><div class="scene-label">看图想一想：这些符号表达了什么情境？</div>`:''}<div class="prompt">${esc(prompt)}</div><div class="wordbank">${choices.map(w=>`<button class="option" data-word="${esc(w)}">${esc(w)}</button>`).join('')}</div><div class="toolbar"><button class="btn" id="check">提交答案</button><button class="btn secondary" id="hint">💡 看提示</button><button class="btn secondary" id="next">下一题 →</button></div><div class="feedback" id="feedback"></div></div>`;
+$('game').innerHTML=`<div class="question"><div class="qtop"><h2>${title}</h2><span class="tag">第 ${index%500+1} / 500 题 · ${gradeNames[grade]}</span></div>${mode==='picture'?`<div class="scene" role="img" aria-label="成语图像联想">${item.pic}</div><div class="scene-label">看图想一想：这些符号表达了什么情境？</div>`:''}<div class="prompt">${esc(prompt)}</div><div class="wordbank">${choices.map(w=>`<button class="option" data-word="${esc(w)}">${esc(w)}</button>`).join('')}</div><div class="toolbar"><button class="btn" id="check">提交答案</button><button class="btn secondary" id="hint">💡 看提示</button><button class="btn secondary" id="next">下一题 →</button></div><div class="feedback" id="feedback"></div></div>`;
 selected=null;document.querySelectorAll('[data-word]').forEach(b=>b.onclick=()=>{selected=b.dataset.word;document.querySelectorAll('[data-word]').forEach(x=>x.classList.toggle('selected',x===b))});$('check').onclick=checkAnswer;$('next').onclick=next;$('hint').onclick=()=>{let f=$('feedback');f.className='feedback show';f.innerHTML='💡 提示：'+esc(item.meaning)+'<br>再读一读句子，想想哪个成语最合适。'};
 }else{
-const routes=[
-['一心一意','意气风发','发扬光大'],['欢天喜地','地久天长','长年累月'],['井井有条','条条大路','路不拾遗'],
-['大吃一惊','惊天动地','地久天长'],['半途而废','废寝忘食','食不甘味'],['持之以恒','恒河沙数','数一数二'],
-['同舟共济','济济一堂','堂堂正正'],['饮水思源','源远流长','长治久安']
+const gradeRoutes=[
+[['一心一意','意气风发','发扬光大'],['欢天喜地','地久天长','长年累月'],['井井有条','条条大路','路不拾遗']],
+[['一举两得','得心应手','手忙脚乱'],['大吃一惊','惊天动地','地久天长'],['自言自语','语重心长','长年累月']],
+[['胸有成竹','竹报平安','安居乐业'],['一举两得','得心应手','手忙脚乱'],['津津有味','味同嚼蜡','蜡...?']],
+[['持之以恒','恒河沙数','数一数二'],['同舟共济','济济一堂','堂堂正正'],['水滴石穿','穿针引线','线...?']],
+[['饮水思源','源远流长','长治久安'],['见微知著','著书立说','说一不二'],['随机应变','变本加厉','厉兵秣马']],
+[['集思广益','益国利民','民富国强'],['见微知著','著书立说','说一不二'],['深思熟虑','虑周藻密','密...?']]
 ];
-const route=routes[index%routes.length], missing=index%3;
+const routes=gradeRoutes[grade].filter(route=>route.every(w=>!w.includes('?')));
+const route=routes[Math.floor(index/3)%routes.length], missing=(index+Math.floor(index/3))%3;
 const choices=shuffle([route[missing],...shuffle(routes.flat().filter(x=>x!==route[missing])).slice(0,5)]);
-$('game').innerHTML=`<div class="question"><div class="qtop"><h2>${title}</h2><span class="tag">第 ${index%100+1} / 100 题</span></div><p class="prompt">接龙规则：前一个成语的最后一个字，要与下一个成语的第一个字相同。请选择缺少的成语。</p><div class="chainrow">${route.map((w,i)=>i===missing?'<span class="chainword" style="background:#e4f4ff">❓ 缺一格</span>':`<span class="chainword">${w}</span>`).join('<span class="chainarrow">→</span>')}</div><div class="options">${choices.map(w=>`<button class="option" data-word="${esc(w)}">${esc(w)}</button>`).join('')}</div><div class="toolbar"><button class="btn" id="check">检查接龙</button><button class="btn secondary" id="next">下一题 →</button></div><div class="feedback" id="feedback"></div></div>`;
+$('game').innerHTML=`<div class="question"><div class="qtop"><h2>${title}</h2><span class="tag">第 ${index%500+1} / 500 题 · ${gradeNames[grade]}</span></div><p class="prompt">接龙规则：前一个成语的最后一个字，要与下一个成语的第一个字相同。请选择缺少的成语。</p><div class="chainrow">${route.map((w,i)=>i===missing?'<span class="chainword" style="background:#e4f4ff">❓ 缺一格</span>':`<span class="chainword">${w}</span>`).join('<span class="chainarrow">→</span>')}</div><div class="options">${choices.map(w=>`<button class="option" data-word="${esc(w)}">${esc(w)}</button>`).join('')}</div><div class="toolbar"><button class="btn" id="check">检查接龙</button><button class="btn secondary" id="next">下一题 →</button></div><div class="feedback" id="feedback"></div></div>`;
 selected=null;document.querySelectorAll('[data-word]').forEach(b=>b.onclick=()=>{selected=b.dataset.word;document.querySelectorAll('[data-word]').forEach(x=>x.classList.toggle('selected',x===b))});$('check').onclick=()=>{if(!selected){alert('请先选择一个成语！');return}const correct=selected===route[missing];const f=$('feedback');f.className='feedback show '+(correct?'':'wrong');f.innerHTML=(correct?'🎉 接龙成功！':'再想一想哦！正确答案是：'+route[missing])+`<div class="explain"><b>接龙路线：</b>${route.join(' → ')}<br><b>说明：</b>前一个成语的末字与下一个成语的首字相同。</div>`;if(!answered){answered=true;showScoreModal(correct,route[missing])}};$('next').onclick=next;
 }}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function checkAnswer(){if(answered)return;let item=questionSet[index%100];let correct=selected===item.idiom;let f=$('feedback');f.className='feedback show '+(correct?'':'wrong');f.innerHTML=(correct?'🎉 答对了！':'再试试看！正确答案是：<b>'+esc(item.idiom)+'</b>')+`<div class="explain"><b>注释：</b>${esc(item.meaning)}<br><b>白话说明：</b>${esc(plain(item.meaning))}<br><b>例句：</b>${esc(item.example)}</div>`;answered=true;showScoreModal(correct,item.idiom)}
 function plain(s){return s.replace(/^形容/,'意思是').replace(/^比喻/,'就是比喻').replace(/。$/,'。')}
-function next(){index=(index+1)%100;answered=false;selected=null;render()}
+function next(){index=(index+1)%500;answered=false;selected=null;render()}
 const chainNotes={
 '意气风发':['形容精神振奋、气概豪迈。','同学们意气风发地迎接新的挑战。'],
 '发扬光大':['使好的传统、作风或事业得到发展和提高。','我们要把互相帮助的精神发扬光大。'],
