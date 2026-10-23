@@ -19,6 +19,12 @@ input,select,textarea{font:inherit;border:2px solid #b7d8e8;border-radius:12px;p
 .chainrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0}.chainword{background:#fff0b6;border:2px solid #fff;border-radius:12px;padding:9px 12px;font-size:1.05rem;font-weight:900}.chainarrow{font-size:1.5rem;color:#2586bd}
 .answerlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}.answercard{border-radius:15px;background:#f4faff;border:1px solid #cce6f3;padding:12px;line-height:1.65}.answercard b{font-size:1.05rem}
 .rankboard{display:grid;gap:10px}.rankrow{display:grid;grid-template-columns:54px minmax(0,1fr) auto;align-items:center;gap:10px;background:#f4faff;border:2px solid #d9edf7;border-radius:16px;padding:12px}.rankrow.top1{background:linear-gradient(110deg,#fff2b8,#fffaf0);border-color:#f3d15d}.rankrow.top2{background:linear-gradient(110deg,#e9f0f7,#fff);border-color:#c7d5e3}.rankrow.top3{background:linear-gradient(110deg,#ffe3d4,#fff);border-color:#efb18e}.ranknum{font-size:1.4rem;font-weight:1000;text-align:center}.rankname{font-weight:950;font-size:1.05rem;overflow-wrap:anywhere}.rankscore{font-size:1.25rem;font-weight:1000;white-space:nowrap;color:#1c69a8}.ranksub{font-size:.8rem;color:#58708b;margin-top:3px}.leaderboard-screen{position:fixed;inset:0;z-index:8000;overflow:auto;background:linear-gradient(150deg,#e8f8ff,#fff8e5 55%,#f3eaff);padding:16px}.leaderboard-screen-inner{max-width:900px;margin:0 auto}.leaderboard-title{text-align:center;font-size:clamp(1.8rem,5vw,3rem);font-weight:1000;color:#174b87;margin:18px 0}.rankrow{animation:rankIn .3s ease both}@keyframes rankIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.hidden{display:none!important}.entry{max-width:540px;margin:18px auto;text-align:center}.entry input{width:100%;margin:10px 0;font-size:1.05rem}.entry .btn{font-size:1rem;padding:12px 22px}.name-pill{background:#fff;border:2px solid #d6e8f1;border-radius:999px;padding:8px 12px;font-weight:900}footer{text-align:center;padding:24px 15px;color:#526e86;font-size:.88rem}
+/* 仅放大题目内容与答案注释；其余页面样式保持不变 */
+.prompt{font-size:1.9rem;line-height:2}
+.answercard{font-size:1.4rem;line-height:2}
+.answercard b{font-size:1.25em}
+.scene{font-size:clamp(3rem,9vw,5.2rem)}
+.chainword{font-size:1.4rem;padding:12px 15px}
 /* 全站字体放大：方便课堂投影与后排学生阅读 */
 html{font-size:19px}
 body{font-size:1.08rem}
