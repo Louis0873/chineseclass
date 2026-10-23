@@ -179,5 +179,5 @@ function renderLeaderboard(){const r=getRecords();const rows=Object.entries(r).s
 function resetAllScores(){const ok=confirm('确定要清空所有学生的积分吗？此操作无法撤销。学生名单会保留，但所有总积分和年段最佳积分将归零。');if(!ok)return;const r=getRecords();Object.keys(r).forEach(name=>{r[name].total=0;r[name].best=Array(6).fill(0)});setRecords(r);score=0;$('score').textContent='0';$('best').textContent='0';renderLeaderboard();alert('所有学生积分已清空，学生名单保留。')}
 $('resetScoresBtn').onclick=resetAllScores;$('resetScoresScreenBtn').onclick=resetAllScores;
 $('openRankScreen').onclick=()=>{$('rankScreen').classList.remove('hidden');renderLeaderboard()};$('closeRankScreen').onclick=()=>$('rankScreen').classList.add('hidden');$('refreshRankScreen').onclick=renderLeaderboard;
-document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));$('answersBtn').onclick=answers;$('closeAnswers').onclick=()=>$('answerPanel').classList.add('hidden');$('switchStudent').onclick=()=>{student='';$('app').classList.add('hidden');$('entry').classList.remove('hidden');$('rosterInput').value=getRoster().join('\n');$('rosterInput').focus()};
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));$('answersBtn').onclick=answers;$('closeAnswers').onclick=()=>$('answerPanel').classList.add('hidden');
 </script></body></html>
