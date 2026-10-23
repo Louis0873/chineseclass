@@ -57,7 +57,7 @@ h3{font-size:1.3rem}
 </section>
 <div id="app" class="hidden">
 <section class="panel">
-  <div class="qtop"><h2>🧭 选择学生年段</h2><span class="name-pill">👤 当前学生：<span id="activeName"></span></span></div><div class="toolbar"><button class="btn secondary" id="addStudentBtn">＋ 添加学生</button></div>
+  <div class="qtop"><h2>🧭 选择学生年段</h2><div class="toolbar" style="align-items:center;margin:0"><span class="name-pill">👤 当前学生：<span id="activeName"></span></span><button class="btn" id="scorePlusBtn" type="button" title="给当前学生加1分">＋ 加1分</button><button class="btn secondary" id="scoreMinusBtn" type="button" title="给当前学生减1分">－ 减1分</button></div></div><div class="toolbar"><button class="btn secondary" id="addStudentBtn">＋ 添加学生</button></div>
   <div class="gradegrid" id="grades"></div>
   <p class="small">年段分类为教学难度建议，并非教育部逐年级官方成语清单。每个年段500道题；每题答对得1分，答错扣1分。成语注释与例句可在答案手册查看。</p>
 </section>
@@ -100,6 +100,8 @@ function showScoreModal(correct, answerText=''){const list=getRoster();if(!list.
 function closeScoreModal(){$('scoreModal').style.display='none';$('scoreModal').classList.add('hidden')}
 function applyManualScore(points){const who=$('scoreStudent').value;if(!who)return;saveScore(points,who);if(who===student){score=record().total||0;$('score').textContent=score;$('best').textContent=(record().best&&record().best[grade])||0}closeScoreModal();renderLeaderboard();next()}
 $('givePoint').onclick=()=>applyManualScore(1);$('takePoint').onclick=()=>applyManualScore(-1);$('closeScoreModal').onclick=closeScoreModal;
+function adjustActiveStudentScore(points){if(!student)return;saveScore(points,student);score=record().total||0;$('score').textContent=score;$('best').textContent=(record().best&&record().best[grade])||0;renderLeaderboard()}
+$('scorePlusBtn').onclick=()=>adjustActiveStudentScore(1);$('scoreMinusBtn').onclick=()=>adjustActiveStudentScore(-1);
 function getRoster(){return safeParse(localStorage.getItem('idiomClassRosterV2')||'[]',[])}
 function saveRoster(list){localStorage.setItem('idiomClassRosterV2',JSON.stringify([...new Set(list.map(x=>x.trim()).filter(Boolean))]))}
 function enterApp(list){list=[...new Set(list.map(x=>x.trim()).filter(Boolean))];if(!list.length){alert('请至少输入一位学生姓名，每行一位。');$('rosterInput').focus();return}saveRoster(list);student=list[0];loadProgress();const r=record();score=r.total||0;$('entry').classList.add('hidden');$('app').classList.remove('hidden');$('activeName').textContent=student;populateStudents();makeGrades();renderLeaderboard();render()}
